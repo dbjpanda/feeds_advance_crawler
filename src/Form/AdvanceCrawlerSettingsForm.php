@@ -4,6 +4,8 @@ namespace Drupal\feeds_advance_crawler\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Class AdvanceCrawlerSettingsForm.
@@ -52,6 +54,16 @@ class AdvanceCrawlerSettingsForm extends ConfigFormBase {
 
     return parent::buildForm($form, $form_state);
   }
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    $values = $form_state->getValues();
+    $host = $values['nodejs_host'];
+    $port = $values['nodejs_port'];
+    $this->checkServer($host, $port);
+  }
 
   /**
    * {@inheritdoc}
@@ -63,5 +75,18 @@ class AdvanceCrawlerSettingsForm extends ConfigFormBase {
       ->set('nodejs_port', $values['nodejs_port'])
       ->save();
     parent::submitForm($form, $form_state);
+  }
+
+  public function checkServer(string $host, string $port) {
+    $client = new Client();
+    $url = $host . ':' . $port;
+
+    try {
+      $response = $client->get($url);
+    }
+    catch (RequestException $e) {
+      $args = ['%site' => $url, '%error' => $e->getMessage()];
+      $this->messenger()->addWarning($this->t('This %site seems to be broken because of error "%error". Please configure the Nodejs server if you haven\'t configured yet.', $args));
+    }
   }
 }
