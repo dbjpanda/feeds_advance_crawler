@@ -8,3 +8,6 @@ feeds_advance_crawler.settings:
     nodejs_port:
       type: string
       label: 'Node.js server port'
+    proxy:
+      type: string
+      label: 'Proxy URL'

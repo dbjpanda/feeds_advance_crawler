@@ -127,7 +127,6 @@ class AdvanceCrawlerFetcher extends PluginBase implements FetcherInterface {
       }
       file_put_contents($sink, $body);
       return new FetcherResult($sink);
-
     } else {
       $args = ['%site' => $url, '%error' => $results['error']['message']];
       throw new \RuntimeException($this->t('The feed from %site seems to be broken because of error "%error".', $args));
@@ -154,6 +153,7 @@ class AdvanceCrawlerFetcher extends PluginBase implements FetcherInterface {
     $url = Feed::translateSchemes($url);
 
     $node_server_url = $config->get('nodejs_host') . ':' . $config->get('nodejs_port');
+    $options['proxy'] = $config->get('proxy');
 
     if ($fetcher_type == 'static_fetcher') {
       $node_server_url .= '/get-static';
